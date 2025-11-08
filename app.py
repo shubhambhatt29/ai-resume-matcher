@@ -36,11 +36,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ✅ Sidebar
-st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg", width=80)
-st.sidebar.title("AI Resume Matcher")
-st.sidebar.write("Match resumes to job descriptions using AI.")
-st.sidebar.markdown("---")
-st.sidebar.info("⚙️ Powered by OpenAI GPT model")
+st.sidebar.image("logo.png", width=140)
+st.sidebar.markdown("### HireSense AI")
+st.sidebar.caption("Smart Resume Match & Job Fit Analyzer")
 
 # ✅ Inputs
 st.header("📄 Job Description")
