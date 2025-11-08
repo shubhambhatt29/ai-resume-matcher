@@ -6,7 +6,17 @@ import re
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # ✅ App Configuration
-st.set_page_config(page_title="AI Resume Matcher", page_icon="🤖", layout="wide")
+st.set_page_config(
+    page_title="HireSense AI | Resume Matcher",
+    page_icon="logo.png",
+    layout="wide"
+)
+st.markdown("""
+    <div style='text-align:center; padding: 10px 0 30px 0;'>
+        <h1 style='color:#2563EB;'>HireSense AI</h1>
+        <p style='font-size:18px; color:#374151;'>Analyze resume fit for job descriptions in seconds.</p>
+    </div>
+""", unsafe_allow_html=True)
 
 # ✅ Custom CSS for styling
 st.markdown("""
@@ -116,3 +126,10 @@ if st.button("🔍 Analyze Match", use_container_width=True):
 
         # ✅ Summary
         st.info(f"💡 Feedback: {result['summary']}")
+
+st.markdown("---")
+st.markdown(
+    "<p style='text-align:center; color:gray;'>© 2025 HireSense AI — Built with ❤️ using Streamlit + OpenAI</p>",
+    unsafe_allow_html=True
+)
+
