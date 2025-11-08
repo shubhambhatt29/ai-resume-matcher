@@ -1,31 +1,120 @@
 import streamlit as st
 import openai
+import re
 
-st.set_page_config(page_title="AI Resume Match Checker", page_icon="🧠")
+# ✅ Load API key
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-st.title("🧠 AI Resume Match Checker")
-st.write("Paste your resume and job description to see match % and improvements.")
+# ✅ App Configuration
+st.set_page_config(page_title="AI Resume Matcher", page_icon="🤖", layout="wide")
 
-resume = st.text_area("Your Resume")
-jd = st.text_area("Job Description")
+# ✅ Custom CSS for styling
+st.markdown("""
+<style>
+    .main {
+        background-color: #f9fafb;
+        font-family: 'Inter', sans-serif;
+    }
+    .stTextArea textarea {
+        border-radius: 10px !important;
+        border: 1px solid #d1d5db;
+        padding: 12px;
+        font-size: 15px;
+    }
+    .match-score {
+        font-size: 26px;
+        font-weight: 700;
+        text-align: center;
+        margin-top: 10px;
+    }
+    .highlight {
+        background-color: #fff3cd;
+        padding: 2px 4px;
+        border-radius: 4px;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-if st.button("Analyze"):
-    if resume and jd:
-        with st.spinner("Analyzing..."):
-            prompt = f"""
-            Compare this resume and job description.
-            Output:
-            1. Match percentage (0–100)
-            2. Missing keywords
-            3. Improvements to resume summary.
-            Resume: {resume}
-            Job Description: {jd}
-            """
-            openai.api_key = st.secrets[OPENAI_API_KEY]
-            response = openai.ChatCompletion.create(
-                model="gpt-4-turbo",
-                messages=[{"role": "user", "content": prompt}],
-            )
-            st.markdown(response['choices'][0]['message']['content'])
+# ✅ Sidebar
+st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg", width=80)
+st.sidebar.title("AI Resume Matcher")
+st.sidebar.write("Match resumes to job descriptions using AI.")
+st.sidebar.markdown("---")
+st.sidebar.info("⚙️ Powered by OpenAI GPT model")
+
+# ✅ Inputs
+st.header("📄 Job Description")
+job_desc = st.text_area("Paste the Job Description", height=180)
+
+st.header("🧑‍💼 Candidate Resume")
+resume_text = st.text_area("Paste the Resume Text", height=180)
+
+# ✅ Function to extract match score + keywords
+def analyze_resume(job, resume):
+    prompt = f"""
+    You are an expert HR analyst. Compare this resume to the job description and give:
+    1. A match percentage (0-100)
+    2. Strengths
+    3. Missing keywords or skills
+    4. A 2-line summary feedback.
+
+    Return response in JSON like:
+    {{
+      "match": 85,
+      "strengths": ["Python", "Microservices", "AWS"],
+      "missing": ["Kafka", "CI/CD"],
+      "summary": "Strong backend skills but lacks DevOps exposure."
+    }}
+
+    JOB DESCRIPTION:
+    {job}
+
+    RESUME:
+    {resume}
+    """
+    response = openai.ChatCompletion.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.3,
+    )
+    text = response.choices[0].message.content
+    return text
+
+# ✅ On button click
+if st.button("🔍 Analyze Match", use_container_width=True):
+    if job_desc.strip() == "" or resume_text.strip() == "":
+        st.warning("Please enter both Job Description and Resume.")
     else:
-        st.error("Please paste both resume and job description.")
+        with st.spinner("Analyzing resume... ⏳"):
+            result_text = analyze_resume(job_desc, resume_text)
+
+        # Extract numbers + text
+        import json
+        try:
+            result = json.loads(result_text)
+        except:
+            st.error("Could not parse AI output. Please try again.")
+            st.text(result_text)
+            st.stop()
+
+        # ✅ Match score section
+        match_score = result["match"]
+        bar_color = "green" if match_score >= 80 else "orange" if match_score >= 50 else "red"
+
+        st.subheader("📊 Match Score")
+        st.progress(match_score / 100)
+        st.markdown(f"<div class='match-score' style='color:{bar_color};'>{match_score}%</div>", unsafe_allow_html=True)
+
+        # ✅ Strengths & Missing
+        col1, col2 = st.columns(2)
+        with col1:
+            st.success("✅ Strengths")
+            for s in result["strengths"]:
+                st.markdown(f"- {s}")
+        with col2:
+            st.error("❌ Missing Keywords")
+            for m in result["missing"]:
+                st.markdown(f"- {m}")
+
+        # ✅ Summary
+        st.info(f"💡 Feedback: {result['summary']}")
