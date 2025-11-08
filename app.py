@@ -1,13 +1,10 @@
 import streamlit as st
 from openai import OpenAI
 import streamlit as st
-
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
 import re
 
 # ✅ Load API key
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # ✅ App Configuration
 st.set_page_config(
