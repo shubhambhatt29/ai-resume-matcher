@@ -21,7 +21,7 @@ if st.button("Analyze"):
             Resume: {resume}
             Job Description: {jd}
             """
-            openai.api_key = st.secrets["OPENAI_API_KEY"]
+            openai.api_key = st.secrets[OPENAI_API_KEY]
             response = openai.ChatCompletion.create(
                 model="gpt-4-turbo",
                 messages=[{"role": "user", "content": prompt}],
