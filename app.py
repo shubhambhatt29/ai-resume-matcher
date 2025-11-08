@@ -1,5 +1,9 @@
 import streamlit as st
-import openai
+from openai import OpenAI
+import streamlit as st
+
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
 import re
 
 # ✅ Load API key
@@ -80,11 +84,12 @@ def analyze_resume(job, resume):
     RESUME:
     {resume}
     """
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.3,
     )
+
     text = response.choices[0].message.content
     return text
 
